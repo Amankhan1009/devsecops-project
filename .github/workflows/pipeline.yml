@@ -12,14 +12,17 @@ jobs:
 
     steps:
 
+    # CHECKOUT CODE
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    # SETUP PYTHON
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
+    # INSTALL DEPENDENCIES
     - name: Install Dependencies
       run: |
         pip install -r app/requirements.txt
@@ -34,20 +37,32 @@ jobs:
         cd app
         docker build -t devsecops-app .
 
-    # CONTAINER SCAN
+    # CONTAINER SECURITY SCAN
     - name: Run Trivy Scan
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'devsecops-app'
 
-    # DEPLOY DEV
+    # IaC SECURITY SCAN
+    - name: Run Checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: terraform/
+
+    # SECURITY POLICY GATE
+    - name: Security Policy Validation
+      run: |
+        echo "Critical vulnerability detected"
+        exit 1
+
+    # DEPLOY TO DEV
     - name: Deploy to Dev
       run: echo "Deploying to Dev Environment"
 
-    # DEPLOY STAGING
+    # DEPLOY TO STAGING
     - name: Deploy to Staging
       run: echo "Deploying to Staging Environment"
 
-    # DEPLOY PROD
+    # DEPLOY TO PRODUCTION
     - name: Deploy to Production
       run: echo "Deploying to Production Environment"
