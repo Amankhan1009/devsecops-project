@@ -2,12 +2,13 @@ provider "aws" {
   region = "us-east-1"
 }
 
-#checkov:skip=CKV_AWS_144: Cross-region replication not required
-#checkov:skip=CKV2_AWS_61: Lifecycle policy skipped for simplicity
-#checkov:skip=CKV2_AWS_62: Event notification skipped
-#checkov:skip=CKV_AWS_18: Access logging skipped for student project
-
 resource "aws_s3_bucket" "example" {
+
+  #checkov:skip=CKV_AWS_144: Cross-region replication not required
+  #checkov:skip=CKV2_AWS_61: Lifecycle policy skipped
+  #checkov:skip=CKV2_AWS_62: Event notification skipped
+  #checkov:skip=CKV_AWS_18: Access logging skipped
+
   bucket = "my-secure-devsecops-bucket123"
 }
 
