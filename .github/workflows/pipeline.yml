@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  security-and-build:
+  security-build-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,41 +28,69 @@ jobs:
         pip install -r app/requirements.txt
 
     # SECRET SCAN
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
+    - name: Install Gitleaks
+      run: |
+        wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.1/gitleaks_8.18.1_linux_x64.tar.gz
+        tar -xzf gitleaks_8.18.1_linux_x64.tar.gz
+        sudo mv gitleaks /usr/local/bin/
+
+    - name: Run Gitleaks Scan
+      run: |
+        gitleaks detect --source . --verbose
 
     # BUILD DOCKER IMAGE
     - name: Build Docker Image
       run: |
         cd app
-        docker build -t devsecops-app .
+        docker build -t flask-devsecops-app .
 
-    # CONTAINER SECURITY SCAN
+    # CONTAINER SCAN
     - name: Run Trivy Scan
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: 'devsecops-app'
+        image-ref: 'flask-devsecops-app'
 
-    # IaC SECURITY SCAN
+    # IaC SCAN
     - name: Run Checkov
       uses: bridgecrewio/checkov-action@master
       with:
         directory: terraform/
 
-    # SECURITY POLICY GATE
-    - name: Security Policy Validation
-      run: |
-        echo "Critical vulnerability detected"
-        exit 1
+    # IMPORT SECRETS FROM VAULT
+    - name: Import Secrets from Vault
+      uses: hashicorp/vault-action@v2
+      with:
+        url: http://YOUR_EC2_PUBLIC_IP:8200
+        token: ${{ secrets.VAULT_TOKEN }}
+        secrets: |
+          secret/data/dockerhub username | DOCKERHUB_USERNAME ;
+          secret/data/dockerhub password | DOCKERHUB_PASSWORD ;
 
-    # DEPLOY TO DEV
+    # DOCKER LOGIN
+    - name: DockerHub Login
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.DOCKERHUB_USERNAME }}
+        password: ${{ env.DOCKERHUB_PASSWORD }}
+
+    # TAG IMAGE
+    - name: Tag Docker Image
+      run: |
+        docker tag flask-devsecops-app YOUR_DOCKERHUB_USERNAME/flask-devsecops-app:latest
+
+    # PUSH IMAGE
+    - name: Push Docker Image
+      run: |
+        docker push YOUR_DOCKERHUB_USERNAME/flask-devsecops-app:latest
+
+    # DEPLOY DEV
     - name: Deploy to Dev
       run: echo "Deploying to Dev Environment"
 
-    # DEPLOY TO STAGING
+    # DEPLOY STAGING
     - name: Deploy to Staging
       run: echo "Deploying to Staging Environment"
 
-    # DEPLOY TO PRODUCTION
+    # DEPLOY PROD
     - name: Deploy to Production
       run: echo "Deploying to Production Environment"
