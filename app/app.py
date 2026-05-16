@@ -1,5 +1,7 @@
 from flask import Flask
 
+password = "admin123"
+
 app = Flask(__name__)
 
 @app.route("/")
