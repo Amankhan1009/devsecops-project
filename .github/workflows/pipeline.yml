@@ -56,15 +56,6 @@ jobs:
       with:
         directory: terraform/
 
-    # IMPORT SECRETS FROM VAULT
-    - name: Import Secrets from Vault
-      uses: hashicorp/vault-action@v2
-      with:
-        url: http://YOUR_EC2_PUBLIC_IP:8200
-        token: ${{ secrets.VAULT_TOKEN }}
-        secrets: |
-          secret/data/dockerhub username | DOCKERHUB_USERNAME ;
-          secret/data/dockerhub password | DOCKERHUB_PASSWORD ;
 
     # DOCKER LOGIN
     - name: DockerHub Login
