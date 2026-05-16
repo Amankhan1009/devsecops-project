@@ -56,24 +56,6 @@ jobs:
       with:
         directory: terraform/
 
-
-    # DOCKER LOGIN
-    - name: DockerHub Login
-      uses: docker/login-action@v2
-      with:
-        username: ${{ env.DOCKERHUB_USERNAME }}
-        password: ${{ env.DOCKERHUB_PASSWORD }}
-
-    # TAG IMAGE
-    - name: Tag Docker Image
-      run: |
-        docker tag flask-devsecops-app YOUR_DOCKERHUB_USERNAME/flask-devsecops-app:latest
-
-    # PUSH IMAGE
-    - name: Push Docker Image
-      run: |
-        docker push YOUR_DOCKERHUB_USERNAME/flask-devsecops-app:latest
-
     # DEPLOY DEV
     - name: Deploy to Dev
       run: echo "Deploying to Dev Environment"
