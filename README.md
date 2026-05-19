@@ -178,10 +178,12 @@ export VAULT_TOKEN='your_root_token'
 
 ## Store Secrets
 
+## Store Secrets
+
 ```bash
 vault kv put secret/devsecops \
-DOCKERHUB_USERNAME="username" \
-DOCKERHUB_PASSWORD="password"
+DOCKERHUB_USERNAME="your_username" \
+DOCKERHUB_PASSWORD="<REDACTED>"
 ```
 
 ## Retrieve Secrets
